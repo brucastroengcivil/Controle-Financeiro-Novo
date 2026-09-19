@@ -35,7 +35,6 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 .forgot-msg{color:var(--green);font-size:13px;margin-top:10px}
 /* App */
 #view-app{max-width:1100px;margin:0 auto;padding:16px 16px 90px}
-/* Cabeçalho fixo */
 .sticky-top{position:sticky;top:0;z-index:100;background:rgba(14,17,22,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);margin:-16px -16px 16px;padding:12px 16px}
 header{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .brand{font-size:19px;font-weight:700;white-space:nowrap}
@@ -49,7 +48,6 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .user-chip{font-size:13px;color:var(--muted);white-space:nowrap}
 .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .menu-btn{display:none;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;width:44px;height:44px;border-radius:10px;line-height:1}
-/* Tabs fixas */
 .sticky-tabs{position:sticky;top:64px;z-index:99;background:rgba(14,17,22,.96);backdrop-filter:blur(8px);padding:8px 0 10px;margin-bottom:4px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
 .tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;min-height:42px}
@@ -375,21 +373,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 0}
 <script>
 // ============================================================
 // VERSÃO DO APP, altere aqui sempre que atualizar o arquivo
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.3.0";
 // ============================================================
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// CONFIGURAÇÃO DO FIREBASE
-// Cole aqui os dados do seu projeto (Passo 4 do guia):
-// Firebase Console > Visão geral > ícone </> (Web) > "Usar no app"
+// CONFIGURAÇÃO DO FIREBASE (credenciais do seu projeto)
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 const firebaseConfig = {
-  apiKey: "COLE_AQUI_SUA_API_KEY",
-  authDomain: "COLE_AQUI_SEU_AUTHDOMAIN",
-  projectId: "COLE_AQUI_SEU_PROJECT_ID",
-  storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
-  messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
-  appId: "COLE_AQUI_SEU_APP_ID"
+  apiKey: "AIzaSyBsO76js6PWhgpd3IJXvlM42iGrz48tt_Q",
+  authDomain: "controle-financeiro-novo-cf2a7.firebaseapp.com",
+  projectId: "controle-financeiro-novo-cf2a7",
+  storageBucket: "controle-financeiro-novo-cf2a7.firebasestorage.app",
+  messagingSenderId: "630480463386",
+  appId: "1:630480463386:web:8a9345a65a3593af5113a3"
 };
 
 // Inicialização protegida: se o Firebase não carregar, o app mostra
@@ -934,4 +930,299 @@ function nearestIndex(clientX){
   });
   return best;
 }
-chartWrap.addEventListener('mousemove', function(e){ showTool
+chartWrap.addEventListener('mousemove', function(e){ showTooltipAt(nearestIndex(e.clientX), e.clientX, e.clientY); });
+chartWrap.addEventListener('mouseleave', hideTooltip);
+chartWrap.addEventListener('touchstart', function(e){ var t=e.touches[0]; showTooltipAt(nearestIndex(t.clientX), t.clientX, t.clientY); }, {passive:true});
+chartWrap.addEventListener('touchmove', function(e){ var t=e.touches[0]; showTooltipAt(nearestIndex(t.clientX), t.clientX, t.clientY); }, {passive:true});
+chartWrap.addEventListener('touchend', hideTooltip);
+
+// ---------- Contas ----------
+$('btn-new-account').addEventListener('click', function(){
+  $('acc-name').value = '';
+  $('acc-currency').value = 'BRL';
+  openModal('modal-account');
+});
+$('btn-save-account').addEventListener('click', saveAccount);
+async function saveAccount(){
+  var name = $('acc-name').value.trim();
+  var cur = $('acc-currency').value;
+  if(!name){ toast('Digite o nome da conta.', 'error'); return; }
+  try {
+    await accountsRef.add({ name: name, currency: cur, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    toast('Conta criada!');
+    closeModal('modal-account');
+  } catch(e){
+    setSync('error', 'Falha ao salvar');
+    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
+  }
+}
+
+async function deleteAccount(id){
+  var acc = accounts.find(function(a){ return a.id === id; });
+  if(!acc) return;
+  if(!confirm('Excluir a conta "' + acc.name + '" e TODOS os lançamentos vinculados a ela?')) return;
+  var batch = db.batch();
+  batch.delete(accountsRef.doc(id));
+  transactions.forEach(function(t){
+    if(t.accountId === id) batch.delete(txsRef.doc(t.id));
+  });
+  try {
+    await batch.commit();
+    toast('Conta excluída.');
+  } catch(e){
+    setSync('error', 'Falha ao excluir');
+    toast('Erro ao excluir: ' + msgFor(e.code), 'error');
+  }
+}
+
+// ---------- Transações ----------
+function fillAccountSelects(){
+  var opts = accounts.map(function(a){
+    return '<option value="'+a.id+'">'+esc(a.name)+' ('+(a.currency==='PEN'?'S/':'R$')+')</option>';
+  }).join('');
+  $('tx-account').innerHTML = opts;
+  $('tx-from').innerHTML = opts;
+  $('tx-to').innerHTML = opts;
+}
+$('btn-add-tx').addEventListener('click', function(){
+  if(!accounts.length){ toast('Crie uma conta primeiro.', 'error'); return; }
+  fillAccountSelects();
+  $('tx-desc').value = ''; $('tx-value').value = '';
+  $('tx-value-out').value = ''; $('tx-value-in').value = '';
+  $('tx-date').value = todayStr();
+  $('tx-rep').value = 'none';
+  $('rep-period').classList.add('hidden');
+  $('tx-effective').checked = false;
+  $('effective-date-box').classList.add('hidden');
+  $('tx-effective-date').value = todayStr();
+  $('tx-from').value = accounts[0].id;
+  $('tx-to').value = accounts.length > 1 ? accounts[1].id : accounts[0].id;
+  setTxType('receita');
+  openModal('modal-tx');
+});
+
+document.querySelectorAll('.tx-type-btn').forEach(function(b){
+  b.addEventListener('click', function(){ setTxType(b.dataset.type); });
+});
+function setTxType(type){
+  txType = type;
+  document.querySelectorAll('.tx-type-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.type === type);
+  });
+  var isTransfer = type === 'transferencia';
+  $('tx-fields').classList.toggle('hidden', isTransfer);
+  $('tx-transfer-fields').classList.toggle('hidden', !isTransfer);
+}
+
+$('tx-rep').addEventListener('change', function(){
+  $('rep-period').classList.toggle('hidden', this.value === 'none');
+  if(this.value !== 'none' && !$('rep-start').value) $('rep-start').value = $('tx-date').value;
+});
+$('tx-effective').addEventListener('change', function(){
+  $('effective-date-box').classList.toggle('hidden', !this.checked);
+  if(this.checked && !$('tx-effective-date').value) $('tx-effective-date').value = todayStr();
+});
+
+$('btn-save-tx').addEventListener('click', saveTx);
+async function saveTx(){
+  if(txType === 'transferencia'){ return saveTransfer(); }
+  var accountId = $('tx-account').value;
+  var account = accounts.find(function(a){ return a.id === accountId; });
+  var desc = $('tx-desc').value.trim();
+  var rep = $('tx-rep').value;
+  var date = $('tx-date').value;
+  var value = parseFloat($('tx-value').value.replace(',', '.'));
+  var eff = $('tx-effective').checked;
+  var effDate = $('tx-effective-date').value;
+
+  if(!account){ toast('Escolha uma conta.', 'error'); return; }
+  if(!desc){ toast('Digite uma descrição.', 'error'); return; }
+  if(!date){ toast('Informe a data prevista.', 'error'); return; }
+  if(!(value > 0)){ toast('Informe um valor maior que zero.', 'error'); return; }
+  if(eff && !effDate){ toast('Informe a data em que foi efetivada.', 'error'); return; }
+
+  var dates = expandRepetition(rep, date, $('rep-start').value, $('rep-end').value);
+  var batch = db.batch();
+  dates.forEach(function(d, i){
+    var ref = txsRef.doc();
+    batch.set(ref, {
+      type: txType,
+      accountId: accountId,
+      description: desc,
+      value: value,
+      currency: account.currency,
+      dataPrevista: d,
+      repetition: rep,
+      efetivada: eff && i === 0,
+      dataEfetivada: (eff && i === 0) ? effDate : null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  });
+  try {
+    await batch.commit();
+    toast(dates.length > 1 ? dates.length + ' lançamentos criados!' : 'Lançamento salvo!');
+    closeModal('modal-tx');
+  } catch(e){
+    setSync('error', 'Falha ao salvar');
+    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
+  }
+}
+
+function expandRepetition(rep, baseDate, start, end){
+  if(rep === 'none') return [baseDate];
+  var s = start || baseDate;
+  var e = end;
+  if(!e || e < s) return [s];
+  var dates = [];
+  var cur = new Date(s + 'T12:00:00');
+  var endD = new Date(e + 'T12:00:00');
+  var guard = 0;
+  while(cur <= endD && guard < 500){
+    dates.push(toYMD(cur));
+    if(rep === 'weekly'){
+      cur.setDate(cur.getDate() + 7);
+    } else {
+      var day = cur.getDate();
+      cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+      var last = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
+      cur.setDate(Math.min(day, last));
+    }
+    guard++;
+  }
+  return dates.length ? dates : [s];
+}
+
+async function saveTransfer(){
+  var fromId = $('tx-from').value;
+  var toId = $('tx-to').value;
+  var vOut = parseFloat($('tx-value-out').value.replace(',', '.'));
+  var vIn = parseFloat($('tx-value-in').value.replace(',', '.'));
+  if(fromId === toId){ toast('Escolha contas diferentes.', 'error'); return; }
+  var from = accounts.find(function(a){ return a.id === fromId; });
+  var to = accounts.find(function(a){ return a.id === toId; });
+  if(!(vOut > 0)){ toast('Informe o valor que sai.', 'error'); return; }
+  if(!(vIn > 0)){ toast('Informe o valor que entra.', 'error'); return; }
+  var today = todayStr();
+  var batch = db.batch();
+  var r1 = txsRef.doc();
+  var r2 = txsRef.doc();
+  batch.set(r1, {
+    type: 'transferencia_origem', accountId: fromId,
+    description: 'Transferência → ' + to.name,
+    value: vOut, currency: from.currency,
+    dataPrevista: today, repetition: 'none',
+    efetivada: true, dataEfetivada: today,
+    linkedTxId: r2.id,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  batch.set(r2, {
+    type: 'transferencia_destino', accountId: toId,
+    description: 'Transferência ← ' + from.name,
+    value: vIn, currency: to.currency,
+    dataPrevista: today, repetition: 'none',
+    efetivada: true, dataEfetivada: today,
+    linkedTxId: r1.id,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  try {
+    await batch.commit();
+    toast('Transferência registrada!');
+    closeModal('modal-tx');
+  } catch(e){
+    setSync('error', 'Falha ao salvar');
+    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
+  }
+}
+
+async function deleteTx(id){
+  if(!confirm('Excluir este lançamento?')) return;
+  var tx = transactions.find(function(t){ return t.id === id; });
+  var batch = db.batch();
+  batch.delete(txsRef.doc(id));
+  if(tx && tx.linkedTxId) batch.delete(txsRef.doc(tx.linkedTxId));
+  try {
+    await batch.commit();
+    toast('Lançamento excluído.');
+  } catch(e){
+    setSync('error', 'Falha ao excluir');
+    toast('Erro ao excluir: ' + msgFor(e.code), 'error');
+  }
+}
+
+// ---------- Trocar senha ----------
+$('btn-password').addEventListener('click', function(){
+  $('pw-current').value = ''; $('pw-new').value = ''; $('pw-confirm').value = '';
+  openModal('modal-password');
+});
+$('btn-save-pw').addEventListener('click', savePassword);
+async function savePassword(){
+  var cur = $('pw-current').value;
+  var nw = $('pw-new').value;
+  var cf = $('pw-confirm').value;
+  if(!cur || !nw){ toast('Preencha todos os campos.', 'error'); return; }
+  if(nw !== cf){ toast('As novas senhas não conferem.', 'error'); return; }
+  if(nw.length < 6){ toast('A nova senha deve ter pelo menos 6 caracteres.', 'error'); return; }
+  try {
+    var cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, cur);
+    await auth.currentUser.reauthenticateWithCredential(cred);
+    await auth.currentUser.updatePassword(nw);
+    toast('Senha alterada com sucesso!');
+    closeModal('modal-password');
+  } catch(e){
+    toast('Erro: ' + msgFor(e.code), 'error');
+  }
+}
+
+// ---------- Exportar CSV ----------
+$('btn-export').addEventListener('click', exportCSV);
+function exportCSV(){
+  if(!transactions.length){ toast('Nenhum lançamento para exportar.', 'error'); return; }
+  var rows = [['Data Prevista','Data Efetivada','Tipo','Conta','Moeda','Descrição','Valor','Status']];
+  var sorted = transactions.slice().sort(function(a,b){ return a.dataPrevista < b.dataPrevista ? 1 : -1; });
+  sorted.forEach(function(t){
+    var typeLabel = t.type==='receita' ? 'Receita' : (t.type==='despesa' ? 'Despesa' : (t.type==='transferencia_origem' ? 'Transferência (saída)' : 'Transferência (entrada)'));
+    rows.push([
+      t.dataPrevista,
+      t.dataEfetivada || '',
+      typeLabel,
+      accountName(t.accountId),
+      t.currency,
+      t.description,
+      t.value.toFixed(2).replace('.', ','),
+      t.efetivada ? 'Efetivado' : 'Previsto'
+    ]);
+  });
+  var csv = '\uFEFF' + rows.map(function(r){
+    return r.map(function(c){ return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';');
+  }).join('\r\n');
+  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'controle-financeiro-' + todayStr() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  toast('CSV exportado!');
+}
+
+// ---------- Fechar modais ----------
+document.querySelectorAll('[data-close]').forEach(function(btn){
+  btn.addEventListener('click', function(){ closeModal(btn.getAttribute('data-close')); });
+});
+document.querySelectorAll('.modal-overlay').forEach(function(ov){
+  ov.addEventListener('click', function(e){ if(e.target === ov) ov.classList.add('hidden'); });
+});
+
+// ---------- Inicialização ----------
+loadCachedRate();
+$('app-version').textContent = 'v' + APP_VERSION;
+$('footer-version').textContent = APP_VERSION;
+fillMonthSelect($('filter-month'));
+fillMonthSelect($('rec-filter-month'));
+fillMonthSelect($('des-filter-month'));
+fillYearMonth($('rec-filter-year'));
+fillYearMonth($('des-filter-year'));
+</script>
+</body>
+</html>
