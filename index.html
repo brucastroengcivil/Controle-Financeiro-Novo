@@ -43,6 +43,10 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18p
 .sync-offline{color:var(--orange);border-color:var(--orange)}
 .sync-error{color:var(--red);border-color:var(--red)}
 .user-chip{font-size:13px;color:var(--muted)}
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 /* Rate */
 .rate-card{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
 .rate-value{font-size:22px;font-weight:700;color:var(--accent)}
@@ -59,7 +63,9 @@ section{margin-bottom:22px}
 .section-head h2{font-size:17px}
 /* Accounts */
 .acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-.acc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.acc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative}
+.acc-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:13px;padding:4px}
+.acc-del:hover{color:var(--red)}
 .acc-name{font-weight:600;margin-bottom:4px}
 .acc-cur{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:2px 8px;display:inline-block;margin-bottom:8px}
 .acc-bal{font-size:20px;font-weight:700}
@@ -165,49 +171,79 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 90px}
     <button class="btn btn-sm btn-ghost" id="btn-logout">Sair</button>
   </header>
 
-  <div class="rate-card">
-    <div>
-      <div class="rate-value" id="rate-value">1 PEN = R$ --</div>
-      <div class="rate-meta" id="rate-updated">Atualizado: --</div>
+  <nav class="tabs">
+    <button class="tab active" data-view="home">🏠 Início</button>
+    <button class="tab" data-view="receitas">📈 Receitas</button>
+    <button class="tab" data-view="despesas">📉 Despesas</button>
+  </nav>
+
+  <div id="view-home">
+    <div class="rate-card">
+      <div>
+        <div class="rate-value" id="rate-value">1 PEN = R$ --</div>
+        <div class="rate-meta" id="rate-updated">Atualizado: --</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-sm" id="btn-refresh-rate">🔄 Atualizar câmbio</button>
     </div>
-    <div class="spacer"></div>
-    <button class="btn btn-sm" id="btn-refresh-rate">🔄 Atualizar câmbio</button>
+
+    <div class="summary">
+      <div class="sum-card"><div class="label">Saldo total em Reais</div><div class="value" id="sum-brl">R$ 0,00</div></div>
+      <div class="sum-card"><div class="label">Saldo total em Soles</div><div class="value" id="sum-pen">S/ 0,00</div></div>
+      <div class="sum-card hl"><div class="label">Saldo total geral (R$)</div><div class="value" id="sum-geral">R$ 0,00</div></div>
+    </div>
+
+    <section id="section-accounts">
+      <div class="section-head">
+        <h2>🏦 Minhas contas</h2>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-ghost" id="btn-new-account">+ Nova conta</button>
+      </div>
+      <div class="acc-grid" id="accounts-list"></div>
+    </section>
+
+    <section id="section-tx">
+      <div class="section-head">
+        <h2>📋 Movimentações</h2>
+        <div class="spacer"></div>
+        <select id="filter-year"></select>
+        <select id="filter-month"></select>
+        <button class="btn btn-sm btn-ghost" id="btn-expand-all">Expandir todos</button>
+        <button class="btn btn-sm btn-ghost" id="btn-collapse-all">Recolher todos</button>
+      </div>
+      <div class="tx-totals" id="tx-totals"></div>
+      <div id="tx-groups"></div>
+    </section>
+
+    <section id="section-chart">
+      <div class="section-head"><h2>📈 Previsão de saldo (lançamentos previstos)</h2></div>
+      <div class="chart-wrap" id="chart-wrap">
+        <div class="chart-tooltip" id="chart-tooltip"></div>
+        <svg id="chart-svg" viewBox="0 0 800 300" width="100%" height="300"></svg>
+      </div>
+    </section>
   </div>
 
-  <div class="summary">
-    <div class="sum-card"><div class="label">Saldo total em Reais</div><div class="value" id="sum-brl">R$ 0,00</div></div>
-    <div class="sum-card"><div class="label">Saldo total em Soles</div><div class="value" id="sum-pen">S/ 0,00</div></div>
-    <div class="sum-card hl"><div class="label">Saldo total geral (R$)</div><div class="value" id="sum-geral">R$ 0,00</div></div>
-  </div>
-
-  <section id="section-accounts">
+  <section id="view-receitas" class="hidden">
     <div class="section-head">
-      <h2>🏦 Minhas contas</h2>
+      <h2>📈 Receitas</h2>
       <div class="spacer"></div>
-      <button class="btn btn-sm btn-ghost" id="btn-new-account">+ Nova conta</button>
+      <select id="rec-filter-year"></select>
+      <select id="rec-filter-month"></select>
     </div>
-    <div class="acc-grid" id="accounts-list"></div>
+    <div class="tx-totals" id="rec-totals"></div>
+    <div id="rec-list"></div>
   </section>
 
-  <section id="section-tx">
+  <section id="view-despesas" class="hidden">
     <div class="section-head">
-      <h2>📋 Movimentações</h2>
+      <h2>📉 Despesas</h2>
       <div class="spacer"></div>
-      <select id="filter-year"></select>
-      <select id="filter-month"></select>
-      <button class="btn btn-sm btn-ghost" id="btn-expand-all">Expandir todos</button>
-      <button class="btn btn-sm btn-ghost" id="btn-collapse-all">Recolher todos</button>
+      <select id="des-filter-year"></select>
+      <select id="des-filter-month"></select>
     </div>
-    <div class="tx-totals" id="tx-totals"></div>
-    <div id="tx-groups"></div>
-  </section>
-
-  <section id="section-chart">
-    <div class="section-head"><h2>📈 Previsão de saldo (lançamentos previstos)</h2></div>
-    <div class="chart-wrap" id="chart-wrap">
-      <div class="chart-tooltip" id="chart-tooltip"></div>
-      <svg id="chart-svg" viewBox="0 0 800 300" width="100%" height="300"></svg>
-    </div>
+    <div class="tx-totals" id="des-totals"></div>
+    <div id="des-list"></div>
   </section>
 
   <button class="fab" id="btn-add-tx" title="Nova transação">+</button>
@@ -317,7 +353,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 90px}
 <script>
 // ============================================================
 // VERSÃO DO APP, altere aqui sempre que atualizar o arquivo
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 // ============================================================
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -326,17 +362,20 @@ const APP_VERSION = "1.0.0";
 // Firebase Console > Visão geral > ícone </> (Web) > "Usar no app"
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 const firebaseConfig = {
-  apiKey: "AIzaSyBsO76js6PWhgpd3IJXvlM42iGrz48tt_Q",
-  authDomain: "controle-financeiro-novo-cf2a7.firebaseapp.com",
-  projectId: "controle-financeiro-novo-cf2a7",
-  storageBucket: "controle-financeiro-novo-cf2a7.firebasestorage.app",
-  messagingSenderId: "630480463386",
-  appId: "1:630480463386:web:8a9345a65a3593af5113a3"
+  apiKey: "COLE_AQUI_SUA_API_KEY",
+  authDomain: "COLE_AQUI_SEU_AUTHDOMAIN",
+  projectId: "COLE_AQUI_SEU_PROJECT_ID",
+  storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
+  messagingSenderId: "COLE_AQUI_SEU_SENDER_ID",
+  appId: "COLE_AQUI_SEU_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// Persistência offline com proteção: se o método não existir no SDK
+// ou o navegador não suportar, o app continua funcionando normalmente.
 try {
   if (typeof db.enableIndexedDbPersistence === 'function') {
     db.enableIndexedDbPersistence().catch(function(err){
@@ -478,13 +517,19 @@ async function fetchRate(){
       }
     } catch(e){}
   }
-  if(!ok){
+  if(ok){
+    toast('Câmbio atualizado: 1 PEN = ' + fmtMoney(rate, 'BRL'));
+  } else {
     toast('Não foi possível atualizar o câmbio. Usando o último valor salvo.', 'error');
-    setSync('ok', 'Sincronizado');
   }
+  restoreSyncState();
   renderRate();
   renderSummary();
   renderChart();
+}
+function restoreSyncState(){
+  if(navigator.onLine) setSync('ok', 'Sincronizado');
+  else setSync('offline', 'Offline, usando dados locais');
 }
 function renderRate(){
   $('rate-value').textContent = '1 PEN = ' + fmtMoney(rate, 'BRL');
@@ -538,6 +583,10 @@ function renderAll(){
   renderTransactions();
   renderChart();
   populateFilters();
+  fillYearMonth($('rec-filter-year'));
+  fillYearMonth($('des-filter-year'));
+  renderTypePage('receita');
+  renderTypePage('despesa');
 }
 
 function accountBalance(acc){
@@ -569,6 +618,7 @@ function renderAccounts(){
   el.innerHTML = accounts.map(function(a){
     var b = accountBalance(a);
     return '<div class="acc-card">' +
+      '<button class="acc-del" onclick="deleteAccount(\'' + a.id + '\')" title="Excluir conta">✕</button>' +
       '<div class="acc-name">' + esc(a.name) + '</div>' +
       '<div class="acc-cur">' + (a.currency==='PEN' ? 'Soles (PEN)' : 'Reais (R$)') + '</div>' +
       '<div class="acc-bal ' + (b<0?'neg':'pos') + '">' + fmtMoney(b, a.currency) + '</div>' +
@@ -576,8 +626,7 @@ function renderAccounts(){
   }).join('');
 }
 
-function populateFilters(){
-  var yearSel = $('filter-year');
+function fillYearMonth(yearSel){
   var current = String(new Date().getFullYear());
   var years = new Set([current]);
   transactions.forEach(function(t){ years.add(t.dataPrevista.slice(0,4)); });
@@ -591,6 +640,7 @@ function populateFilters(){
   if(prev && years.has(prev)) yearSel.value = prev;
   else yearSel.value = current;
 }
+function populateFilters(){ fillYearMonth($('filter-year')); }
 
 function renderTransactions(){
   var year = $('filter-year').value;
@@ -672,6 +722,82 @@ $('btn-collapse-all').addEventListener('click', function(){ expandedAll = false;
 $('filter-year').addEventListener('change', renderTransactions);
 $('filter-month').addEventListener('change', renderTransactions);
 
+// ---------- Abas: Início / Receitas / Despesas ----------
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    t.classList.add('active');
+    var v = t.dataset.view;
+    $('view-home').classList.toggle('hidden', v !== 'home');
+    $('view-receitas').classList.toggle('hidden', v !== 'receitas');
+    $('view-despesas').classList.toggle('hidden', v !== 'despesas');
+    if(v === 'receitas') renderTypePage('receita');
+    if(v === 'despesas') renderTypePage('despesa');
+  });
+});
+
+function fillMonthSelect(sel){
+  ['Todos','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].forEach(function(m, i){
+    var o = document.createElement('option');
+    o.value = i === 0 ? '' : pad(i);
+    o.textContent = m;
+    sel.appendChild(o);
+  });
+}
+
+function renderTypePage(type){
+  var isRec = type === 'receita';
+  var yearSel = isRec ? $('rec-filter-year') : $('des-filter-year');
+  var monthSel = isRec ? $('rec-filter-month') : $('des-filter-month');
+  var totalsEl = isRec ? $('rec-totals') : $('des-totals');
+  var listEl = isRec ? $('rec-list') : $('des-list');
+  var year = yearSel.value, month = monthSel.value;
+  var list = transactions.filter(function(t){
+    if(t.type !== type) return false;
+    var ym = t.dataPrevista.slice(0, 7);
+    return (!year || ym.slice(0,4) === year) && (!month || ym.slice(5,7) === month);
+  });
+  var totalBRL = 0, totalPEN = 0, prevBRL = 0, prevPEN = 0, realBRL = 0, realPEN = 0;
+  list.forEach(function(t){
+    if(t.currency === 'BRL'){
+      totalBRL += t.value;
+      if(t.efetivada) realBRL += t.value; else prevBRL += t.value;
+    } else {
+      totalPEN += t.value;
+      if(t.efetivada) realPEN += t.value; else prevPEN += t.value;
+    }
+  });
+  totalsEl.innerHTML = 'Total: <b>' + fmtMoney(totalBRL,'BRL') + '</b> | <b>' + fmtMoney(totalPEN,'PEN') + '</b>' +
+    ' &nbsp;·&nbsp; Previsto: <b>' + fmtMoney(prevBRL,'BRL') + '</b> | <b>' + fmtMoney(prevPEN,'PEN') + '</b>' +
+    ' &nbsp;·&nbsp; Efetivado: <b>' + fmtMoney(realBRL,'BRL') + '</b> | <b>' + fmtMoney(realPEN,'PEN') + '</b>';
+  var groups = {};
+  list.forEach(function(t){ (groups[t.dataPrevista] = groups[t.dataPrevista] || []).push(t); });
+  var dates = Object.keys(groups).sort().reverse();
+  if(!dates.length){
+    listEl.innerHTML = '<div class="empty">Nenhum lançamento no período selecionado.</div>';
+    return;
+  }
+  listEl.innerHTML = dates.map(function(date){
+    var items = groups[date];
+    var dBRL = 0, dPEN = 0;
+    items.forEach(function(t){ if(t.currency === 'BRL') dBRL += t.value; else dPEN += t.value; });
+    var dayTotal = (dBRL !== 0 ? fmtMoney(dBRL,'BRL') : '') + (dBRL !== 0 && dPEN !== 0 ? ' · ' : '') + (dPEN !== 0 ? fmtMoney(dPEN,'PEN') : '');
+    return '<div class="day-group">' +
+      '<div class="day-head" onclick="toggleDay(this)">' +
+        '<span class="day-date">📅 ' + fmtDate(date) + '</span>' +
+        '<span class="day-total">' + dayTotal + '</span>' +
+        '<span class="day-arrow">▲</span>' +
+      '</div>' +
+      '<div class="day-body">' + items.map(txHTML).join('') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+$('rec-filter-year').addEventListener('change', function(){ renderTypePage('receita'); });
+$('rec-filter-month').addEventListener('change', function(){ renderTypePage('receita'); });
+$('des-filter-year').addEventListener('change', function(){ renderTypePage('despesa'); });
+$('des-filter-month').addEventListener('change', function(){ renderTypePage('despesa'); });
+
 // ---------- Gráfico de previsão ----------
 const CHART_W = 800, CHART_H = 300, CHART_PADL = 70, CHART_PADR = 24, CHART_PADT = 30, CHART_PADB = 44;
 
@@ -730,318 +856,4 @@ function renderChart(){
   out += '<circle cx="'+x(minIdx)+'" cy="'+y(chartPoints[minIdx].balance)+'" r="7" fill="#ff5d5d" stroke="#fff" stroke-width="2"/>';
   out += '<text x="'+x(minIdx)+'" y="'+(y(chartPoints[minIdx].balance)-14)+'" text-anchor="middle" fill="#ff5d5d" font-size="13" font-weight="bold">Menor saldo</text>';
 
-  chartPoints.forEach(function(p,i){
-    var label = p.label + (p.label==='jan' ? '/'+String(p.year).slice(2) : '');
-    out += '<text x="'+x(i)+'" y="'+(CHART_H-16)+'" text-anchor="middle" fill="#8b96a8" font-size="12">'+label+'</text>';
-  });
-
-  svg.innerHTML = out;
-}
-
-var chartWrap = $('chart-wrap');
-var tooltip = $('chart-tooltip');
-function showTooltipAt(i, clientX, clientY){
-  if(!chartPoints[i]) return;
-  var rect = chartWrap.getBoundingClientRect();
-  var p = chartPoints[i];
-  tooltip.innerHTML = '<b>'+p.label+'/'+p.year+'</b><br>Saldo: '+fmtMoney(p.balance,'BRL');
-  tooltip.style.display = 'block';
-  var left = clientX - rect.left + 14;
-  var top = clientY - rect.top - 10;
-  if(left + 160 > rect.width) left = clientX - rect.left - 170;
-  if(top < 0) top = 0;
-  tooltip.style.left = left+'px';
-  tooltip.style.top = top+'px';
-}
-function hideTooltip(){ tooltip.style.display = 'none'; }
-function nearestIndex(clientX){
-  var rect = chartWrap.getBoundingClientRect();
-  var px = (clientX - rect.left) / rect.width * CHART_W;
-  var best = 0, bd = 1e9;
-  chartPoints.forEach(function(p,i){
-    var xi = CHART_PADL + i*(CHART_W-CHART_PADL-CHART_PADR)/(chartPoints.length-1);
-    var d = Math.abs(xi - px);
-    if(d < bd){ bd = d; best = i; }
-  });
-  return best;
-}
-chartWrap.addEventListener('mousemove', function(e){ showTooltipAt(nearestIndex(e.clientX), e.clientX, e.clientY); });
-chartWrap.addEventListener('mouseleave', hideTooltip);
-chartWrap.addEventListener('touchstart', function(e){ var t=e.touches[0]; showTooltipAt(nearestIndex(t.clientX), t.clientX, t.clientY); }, {passive:true});
-chartWrap.addEventListener('touchmove', function(e){ var t=e.touches[0]; showTooltipAt(nearestIndex(t.clientX), t.clientX, t.clientY); }, {passive:true});
-chartWrap.addEventListener('touchend', hideTooltip);
-
-// ---------- Contas ----------
-$('btn-new-account').addEventListener('click', function(){
-  $('acc-name').value = '';
-  $('acc-currency').value = 'BRL';
-  openModal('modal-account');
-});
-$('btn-save-account').addEventListener('click', saveAccount);
-async function saveAccount(){
-  var name = $('acc-name').value.trim();
-  var cur = $('acc-currency').value;
-  if(!name){ toast('Digite o nome da conta.', 'error'); return; }
-  try {
-    await accountsRef.add({ name: name, currency: cur, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    toast('Conta criada!');
-    closeModal('modal-account');
-  } catch(e){
-    setSync('error', 'Falha ao salvar');
-    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
-  }
-}
-
-// ---------- Transações ----------
-function fillAccountSelects(){
-  var opts = accounts.map(function(a){
-    return '<option value="'+a.id+'">'+esc(a.name)+' ('+(a.currency==='PEN'?'S/':'R$')+')</option>';
-  }).join('');
-  $('tx-account').innerHTML = opts;
-  $('tx-from').innerHTML = opts;
-  $('tx-to').innerHTML = opts;
-}
-$('btn-add-tx').addEventListener('click', function(){
-  if(!accounts.length){ toast('Crie uma conta primeiro.', 'error'); return; }
-  fillAccountSelects();
-  $('tx-desc').value = ''; $('tx-value').value = '';
-  $('tx-value-out').value = ''; $('tx-value-in').value = '';
-  $('tx-date').value = todayStr();
-  $('tx-rep').value = 'none';
-  $('rep-period').classList.add('hidden');
-  $('tx-effective').checked = false;
-  $('effective-date-box').classList.add('hidden');
-  $('tx-effective-date').value = todayStr();
-  $('tx-from').value = accounts[0].id;
-  $('tx-to').value = accounts.length > 1 ? accounts[1].id : accounts[0].id;
-  setTxType('receita');
-  openModal('modal-tx');
-});
-
-document.querySelectorAll('.tx-type-btn').forEach(function(b){
-  b.addEventListener('click', function(){ setTxType(b.dataset.type); });
-});
-function setTxType(type){
-  txType = type;
-  document.querySelectorAll('.tx-type-btn').forEach(function(b){
-    b.classList.toggle('active', b.dataset.type === type);
-  });
-  var isTransfer = type === 'transferencia';
-  $('tx-fields').classList.toggle('hidden', isTransfer);
-  $('tx-transfer-fields').classList.toggle('hidden', !isTransfer);
-}
-
-$('tx-rep').addEventListener('change', function(){
-  $('rep-period').classList.toggle('hidden', this.value === 'none');
-  if(this.value !== 'none' && !$('rep-start').value) $('rep-start').value = $('tx-date').value;
-});
-$('tx-effective').addEventListener('change', function(){
-  $('effective-date-box').classList.toggle('hidden', !this.checked);
-  if(this.checked && !$('tx-effective-date').value) $('tx-effective-date').value = todayStr();
-});
-
-$('btn-save-tx').addEventListener('click', saveTx);
-async function saveTx(){
-  if(txType === 'transferencia'){ return saveTransfer(); }
-  var accountId = $('tx-account').value;
-  var account = accounts.find(function(a){ return a.id === accountId; });
-  var desc = $('tx-desc').value.trim();
-  var rep = $('tx-rep').value;
-  var date = $('tx-date').value;
-  var value = parseFloat($('tx-value').value.replace(',', '.'));
-  var eff = $('tx-effective').checked;
-  var effDate = $('tx-effective-date').value;
-
-  if(!account){ toast('Escolha uma conta.', 'error'); return; }
-  if(!desc){ toast('Digite uma descrição.', 'error'); return; }
-  if(!date){ toast('Informe a data prevista.', 'error'); return; }
-  if(!(value > 0)){ toast('Informe um valor maior que zero.', 'error'); return; }
-  if(eff && !effDate){ toast('Informe a data em que foi efetivada.', 'error'); return; }
-
-  var dates = expandRepetition(rep, date, $('rep-start').value, $('rep-end').value);
-  var batch = db.batch();
-  dates.forEach(function(d, i){
-    var ref = txsRef.doc();
-    batch.set(ref, {
-      type: txType,
-      accountId: accountId,
-      description: desc,
-      value: value,
-      currency: account.currency,
-      dataPrevista: d,
-      repetition: rep,
-      efetivada: eff && i === 0,
-      dataEfetivada: (eff && i === 0) ? effDate : null,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  });
-  try {
-    await batch.commit();
-    toast(dates.length > 1 ? dates.length + ' lançamentos criados!' : 'Lançamento salvo!');
-    closeModal('modal-tx');
-  } catch(e){
-    setSync('error', 'Falha ao salvar');
-    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
-  }
-}
-
-function expandRepetition(rep, baseDate, start, end){
-  if(rep === 'none') return [baseDate];
-  var s = start || baseDate;
-  var e = end;
-  if(!e || e < s) return [s];
-  var dates = [];
-  var cur = new Date(s + 'T12:00:00');
-  var endD = new Date(e + 'T12:00:00');
-  var guard = 0;
-  while(cur <= endD && guard < 500){
-    dates.push(toYMD(cur));
-    if(rep === 'weekly'){
-      cur.setDate(cur.getDate() + 7);
-    } else {
-      var day = cur.getDate();
-      cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
-      var last = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
-      cur.setDate(Math.min(day, last));
-    }
-    guard++;
-  }
-  return dates.length ? dates : [s];
-}
-
-async function saveTransfer(){
-  var fromId = $('tx-from').value;
-  var toId = $('tx-to').value;
-  var vOut = parseFloat($('tx-value-out').value.replace(',', '.'));
-  var vIn = parseFloat($('tx-value-in').value.replace(',', '.'));
-  if(fromId === toId){ toast('Escolha contas diferentes.', 'error'); return; }
-  var from = accounts.find(function(a){ return a.id === fromId; });
-  var to = accounts.find(function(a){ return a.id === toId; });
-  if(!(vOut > 0)){ toast('Informe o valor que sai.', 'error'); return; }
-  if(!(vIn > 0)){ toast('Informe o valor que entra.', 'error'); return; }
-  var today = todayStr();
-  var batch = db.batch();
-  var r1 = txsRef.doc();
-  var r2 = txsRef.doc();
-  batch.set(r1, {
-    type: 'transferencia_origem', accountId: fromId,
-    description: 'Transferência → ' + to.name,
-    value: vOut, currency: from.currency,
-    dataPrevista: today, repetition: 'none',
-    efetivada: true, dataEfetivada: today,
-    linkedTxId: r2.id,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  batch.set(r2, {
-    type: 'transferencia_destino', accountId: toId,
-    description: 'Transferência ← ' + from.name,
-    value: vIn, currency: to.currency,
-    dataPrevista: today, repetition: 'none',
-    efetivada: true, dataEfetivada: today,
-    linkedTxId: r1.id,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  try {
-    await batch.commit();
-    toast('Transferência registrada!');
-    closeModal('modal-tx');
-  } catch(e){
-    setSync('error', 'Falha ao salvar');
-    toast('Erro ao salvar: ' + msgFor(e.code), 'error');
-  }
-}
-
-async function deleteTx(id){
-  if(!confirm('Excluir este lançamento?')) return;
-  var tx = transactions.find(function(t){ return t.id === id; });
-  var batch = db.batch();
-  batch.delete(txsRef.doc(id));
-  if(tx && tx.linkedTxId) batch.delete(txsRef.doc(tx.linkedTxId));
-  try {
-    await batch.commit();
-    toast('Lançamento excluído.');
-  } catch(e){
-    setSync('error', 'Falha ao excluir');
-    toast('Erro ao excluir: ' + msgFor(e.code), 'error');
-  }
-}
-
-// ---------- Trocar senha ----------
-$('btn-password').addEventListener('click', function(){
-  $('pw-current').value = ''; $('pw-new').value = ''; $('pw-confirm').value = '';
-  openModal('modal-password');
-});
-$('btn-save-pw').addEventListener('click', savePassword);
-async function savePassword(){
-  var cur = $('pw-current').value;
-  var nw = $('pw-new').value;
-  var cf = $('pw-confirm').value;
-  if(!cur || !nw){ toast('Preencha todos os campos.', 'error'); return; }
-  if(nw !== cf){ toast('As novas senhas não conferem.', 'error'); return; }
-  if(nw.length < 6){ toast('A nova senha deve ter pelo menos 6 caracteres.', 'error'); return; }
-  try {
-    var cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, cur);
-    await auth.currentUser.reauthenticateWithCredential(cred);
-    await auth.currentUser.updatePassword(nw);
-    toast('Senha alterada com sucesso!');
-    closeModal('modal-password');
-  } catch(e){
-    toast('Erro: ' + msgFor(e.code), 'error');
-  }
-}
-
-// ---------- Exportar CSV ----------
-$('btn-export').addEventListener('click', exportCSV);
-function exportCSV(){
-  if(!transactions.length){ toast('Nenhum lançamento para exportar.', 'error'); return; }
-  var rows = [['Data Prevista','Data Efetivada','Tipo','Conta','Moeda','Descrição','Valor','Status']];
-  var sorted = transactions.slice().sort(function(a,b){ return a.dataPrevista < b.dataPrevista ? 1 : -1; });
-  sorted.forEach(function(t){
-    var typeLabel = t.type==='receita' ? 'Receita' : (t.type==='despesa' ? 'Despesa' : (t.type==='transferencia_origem' ? 'Transferência (saída)' : 'Transferência (entrada)'));
-    rows.push([
-      t.dataPrevista,
-      t.dataEfetivada || '',
-      typeLabel,
-      accountName(t.accountId),
-      t.currency,
-      t.description,
-      t.value.toFixed(2).replace('.', ','),
-      t.efetivada ? 'Efetivado' : 'Previsto'
-    ]);
-  });
-  var csv = '\uFEFF' + rows.map(function(r){
-    return r.map(function(c){ return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';');
-  }).join('\r\n');
-  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'controle-financeiro-' + todayStr() + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  toast('CSV exportado!');
-}
-
-// ---------- Fechar modais ----------
-document.querySelectorAll('[data-close]').forEach(function(btn){
-  btn.addEventListener('click', function(){ closeModal(btn.getAttribute('data-close')); });
-});
-document.querySelectorAll('.modal-overlay').forEach(function(ov){
-  ov.addEventListener('click', function(e){ if(e.target === ov) ov.classList.add('hidden'); });
-});
-
-// ---------- Inicialização ----------
-loadCachedRate();
-$('app-version').textContent = 'v' + APP_VERSION;
-$('footer-version').textContent = APP_VERSION;
-var monthSel = $('filter-month');
-['Todos','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].forEach(function(m, i){
-  var o = document.createElement('option');
-  o.value = i === 0 ? '' : pad(i);
-  o.textContent = m;
-  monthSel.appendChild(o);
-});
-</script>
-</body>
-</html>
+  chartPoints.forEach(function(p
