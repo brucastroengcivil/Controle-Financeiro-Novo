@@ -11,16 +11,18 @@
   --red:#ff5d5d; --yellow:#f5b942; --orange:#ff8c42;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh}
 .hidden{display:none!important}
 button{font-family:inherit;cursor:pointer}
-input,select{font-family:inherit;font-size:15px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:100%;outline:none}
+input,select{font-family:inherit;font-size:16px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:11px 12px;width:100%;outline:none}
 input:focus,select:focus{border-color:var(--accent)}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 16px;font-size:15px;font-weight:600;width:100%}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 16px;font-size:15px;font-weight:600;width:100%}
 .btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-sm{width:auto;padding:7px 12px;font-size:13px;border-radius:7px}
+.btn-sm{width:auto;padding:8px 12px;font-size:13px;border-radius:8px;min-height:36px}
 /* Login */
 #view-login{max-width:400px;margin:0 auto;padding:40px 20px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .login-logo{text-align:center;margin-bottom:24px}
@@ -32,20 +34,25 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 .link:hover{text-decoration:underline}
 .forgot-msg{color:var(--green);font-size:13px;margin-top:10px}
 /* App */
-#view-app{max-width:1100px;margin:0 auto;padding:16px}
-header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
-.brand{font-size:20px;font-weight:700}
-.brand small{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
+#view-app{max-width:1100px;margin:0 auto;padding:16px 16px 90px}
+/* Cabeçalho fixo */
+.sticky-top{position:sticky;top:0;z-index:100;background:rgba(14,17,22,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);margin:-16px -16px 16px;padding:12px 16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.brand{font-size:19px;font-weight:700;white-space:nowrap}
+.brand small{color:var(--muted);font-weight:400;font-size:11px;margin-left:6px}
 .spacer{flex:1}
-.sync{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:20px;border:1px solid var(--border)}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:20px;border:1px solid var(--border);white-space:nowrap}
 .sync-ok{color:var(--green);border-color:var(--green)}
 .sync-saving{color:var(--yellow);border-color:var(--yellow)}
 .sync-offline{color:var(--orange);border-color:var(--orange)}
 .sync-error{color:var(--red);border-color:var(--red)}
-.user-chip{font-size:13px;color:var(--muted)}
-/* Tabs */
-.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.user-chip{font-size:13px;color:var(--muted);white-space:nowrap}
+.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.menu-btn{display:none;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:22px;width:44px;height:44px;border-radius:10px;line-height:1}
+/* Tabs fixas */
+.sticky-tabs{position:sticky;top:64px;z-index:99;background:rgba(14,17,22,.96);backdrop-filter:blur(8px);padding:8px 0 10px;margin-bottom:4px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;min-height:42px}
 .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 /* Rate */
 .rate-card{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px}
@@ -55,7 +62,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18p
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 .sum-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
 .sum-card .label{font-size:12px;color:var(--muted);margin-bottom:6px}
-.sum-card .value{font-size:22px;font-weight:700}
+.sum-card .value{font-size:22px;font-weight:700;word-break:break-word}
 .sum-card.hl{border-color:var(--accent)}
 /* Sections */
 section{margin-bottom:22px}
@@ -64,21 +71,19 @@ section{margin-bottom:22px}
 /* Accounts */
 .acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .acc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative}
-.acc-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:13px;padding:4px}
+.acc-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:14px;padding:6px;min-width:32px;min-height:32px}
 .acc-del:hover{color:var(--red)}
-.acc-name{font-weight:600;margin-bottom:4px}
+.acc-name{font-weight:600;margin-bottom:4px;padding-right:24px}
 .acc-cur{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:2px 8px;display:inline-block;margin-bottom:8px}
-.acc-bal{font-size:20px;font-weight:700}
+.acc-bal{font-size:20px;font-weight:700;word-break:break-word}
 /* Transactions */
-.tx-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-.tx-toolbar select{width:auto}
-.tx-totals{font-size:13px;color:var(--muted);margin-bottom:10px}
+.tx-totals{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7}
 .tx-totals b{color:var(--text)}
 .day-group{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
 .day-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
 .day-head:hover{background:var(--card2)}
 .day-date{font-weight:600;font-size:14px}
-.day-total{font-size:13px;color:var(--muted);margin-left:auto}
+.day-total{font-size:13px;color:var(--muted);margin-left:auto;text-align:right}
 .tx{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--border)}
 .tx-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .tx-icon.receita{background:rgba(46,204,113,.15);color:var(--green)}
@@ -89,48 +94,58 @@ section{margin-bottom:22px}
 .tx-meta{font-size:12px;color:var(--muted)}
 .tx-val{font-weight:700;font-size:14px;white-space:nowrap}
 .pos{color:var(--green)} .neg{color:var(--red)}
-.chip{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--muted)}
+.chip{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
 .chip.eff{color:var(--green);border-color:var(--green)}
-.btn-del{background:none;border:none;color:var(--muted);font-size:14px;padding:4px}
+.btn-del{background:none;border:none;color:var(--muted);font-size:14px;padding:6px;min-width:32px;min-height:32px}
 .btn-del:hover{color:var(--red)}
 /* Chart */
-.chart-wrap{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.chart-wrap{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;overflow:hidden}
 .chart-tooltip{position:absolute;pointer-events:none;background:#0b0e13;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;display:none;z-index:5}
 /* FAB */
 .fab{position:fixed;bottom:22px;right:22px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:30px;box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:10}
 .fab:hover{filter:brightness(1.1)}
 /* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:22px}
 .modal h3{font-size:18px;margin-bottom:14px}
-.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;min-width:36px;min-height:36px}
 .tx-type-row{display:flex;gap:8px;margin-bottom:14px}
-.tx-type-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-weight:600}
+.tx-type-btn{flex:1;padding:11px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-weight:600;min-height:44px}
 .tx-type-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .check-row{display:flex;align-items:center;gap:8px;margin-top:12px}
-.check-row input{width:auto}
+.check-row input{width:auto;min-width:22px;min-height:22px}
 .check-row label{margin:0}
 .modal-actions{display:flex;gap:10px;margin-top:18px}
 .modal-actions .btn{flex:1}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 90px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 0}
 /* Toast */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0b0e13;border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0b0e13;border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:300;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
 .toast.error{border-color:var(--red);color:var(--red)}
 .toast.ok{border-color:var(--green);color:var(--green)}
 .empty{color:var(--muted);font-size:14px;text-align:center;padding:20px}
 /* Responsive */
-@media(max-width:760px){
-  .summary{grid-template-columns:1fr}
-  header{gap:8px}
-  .brand{width:100%}
+@media(max-width:768px){
+  #view-app{padding:12px 12px 90px}
+  .sticky-top{margin:-12px -12px 12px;padding:10px 12px}
+  .sticky-tabs{top:60px}
+  .summary{grid-template-columns:1fr 1fr}
+  .menu-btn{display:block}
+  .header-actions{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;flex-direction:column;gap:8px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .header-actions.open{display:flex}
+  .header-actions .btn-sm{width:100%}
+  .header-actions .user-chip{text-align:center}
+  .brand{font-size:17px}
 }
 @media(max-width:480px){
-  #view-app{padding:10px}
+  .summary{grid-template-columns:1fr}
   .rate-value{font-size:18px}
   .sum-card .value{font-size:18px}
   .tx-desc{font-size:13px}
   .fab{bottom:16px;right:16px}
+  .tx{flex-wrap:wrap}
+  .tx-val{margin-left:42px}
+  .section-head h2{font-size:16px}
 }
 </style>
 </head>
@@ -161,21 +176,28 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 90px}
 
 <!-- ============ APP ============ -->
 <div id="view-app" class="hidden">
-  <header>
-    <div class="brand">💰 Controle Financeiro <small id="app-version"></small></div>
-    <div class="spacer"></div>
-    <div class="sync sync-offline" id="sync-indicator">● Conectando...</div>
-    <span class="user-chip" id="user-email"></span>
-    <button class="btn btn-sm btn-ghost" id="btn-password">Trocar senha</button>
-    <button class="btn btn-sm btn-ghost" id="btn-export">Exportar CSV</button>
-    <button class="btn btn-sm btn-ghost" id="btn-logout">Sair</button>
-  </header>
 
-  <nav class="tabs">
-    <button class="tab active" data-view="home">🏠 Início</button>
-    <button class="tab" data-view="receitas">📈 Receitas</button>
-    <button class="tab" data-view="despesas">📉 Despesas</button>
-  </nav>
+  <div class="sticky-top">
+    <header>
+      <div class="brand">💰 Controle Financeiro <small id="app-version"></small></div>
+      <div class="spacer"></div>
+      <div class="sync sync-offline" id="sync-indicator">● Conectando...</div>
+      <button class="menu-btn" id="btn-menu" aria-label="Menu">☰</button>
+      <div class="header-actions" id="header-actions">
+        <span class="user-chip" id="user-email"></span>
+        <button class="btn btn-sm btn-ghost" id="btn-password">Trocar senha</button>
+        <button class="btn btn-sm btn-ghost" id="btn-export">Exportar CSV</button>
+        <button class="btn btn-sm btn-ghost" id="btn-logout">Sair</button>
+      </div>
+    </header>
+    <div class="sticky-tabs">
+      <nav class="tabs">
+        <button class="tab active" data-view="home">🏠 Início</button>
+        <button class="tab" data-view="receitas">📈 Receitas</button>
+        <button class="tab" data-view="despesas">📉 Despesas</button>
+      </nav>
+    </div>
+  </div>
 
   <div id="view-home">
     <div class="rate-card">
@@ -353,7 +375,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 90px}
 <script>
 // ============================================================
 // VERSÃO DO APP, altere aqui sempre que atualizar o arquivo
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.2.0";
 // ============================================================
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -370,22 +392,19 @@ const firebaseConfig = {
   appId: "COLE_AQUI_SEU_APP_ID"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Persistência offline com proteção: se o método não existir no SDK
-// ou o navegador não suportar, o app continua funcionando normalmente.
+// Inicialização protegida: se o Firebase não carregar, o app mostra
+// uma mensagem clara na tela de login em vez de travar o botão.
+let auth = null;
+let db = null;
 try {
-  if (typeof db.enableIndexedDbPersistence === 'function') {
-    db.enableIndexedDbPersistence().catch(function(err){
-      if (err.code !== 'already-exists') console.error('Persistência offline:', err);
-    });
-  } else {
-    console.warn('Persistência offline indisponível nesta versão do SDK.');
+  if (typeof firebase === 'undefined') {
+    throw new Error('SDK do Firebase não carregou. Verifique sua conexão.');
   }
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
 } catch(e) {
-  console.warn('Persistência offline indisponível:', e);
+  console.error('Falha ao inicializar Firebase:', e);
 }
 
 // ---------- Estado ----------
@@ -450,14 +469,24 @@ function showApp(){ $('view-login').classList.add('hidden'); $('view-app').class
 $('btn-login').addEventListener('click', doLogin);
 $('login-password').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 async function doLogin(){
+  $('login-error').textContent = '';
+  if(!auth){
+    $('login-error').textContent = 'Firebase não inicializou. Confira o firebaseConfig e a conexão.';
+    return;
+  }
   var email = $('login-email').value.trim();
   var pass = $('login-password').value;
-  $('login-error').textContent = '';
   if(!email || !pass){ $('login-error').textContent = 'Preencha e-mail e senha.'; return; }
+  var btn = $('btn-login');
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
   try {
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e){
     $('login-error').textContent = msgFor(e.code);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
   }
 }
 
@@ -466,6 +495,7 @@ $('btn-send-reset').addEventListener('click', sendReset);
 async function sendReset(){
   var email = $('forgot-email').value.trim();
   $('forgot-msg').textContent = '';
+  if(!auth){ $('forgot-msg').textContent = 'Firebase não inicializou.'; return; }
   if(!email){ $('forgot-msg').textContent = 'Digite seu e-mail.'; return; }
   try {
     await auth.sendPasswordResetEmail(email);
@@ -475,19 +505,32 @@ async function sendReset(){
   }
 }
 
-$('btn-logout').addEventListener('click', function(){ auth.signOut(); });
+$('btn-logout').addEventListener('click', function(){ auth && auth.signOut(); });
 
-auth.onAuthStateChanged(function(user){
-  if(user){
-    $('user-email').textContent = user.email;
-    showApp();
-    loadData();
-    fetchRate();
-  } else {
-    unsubs.forEach(function(u){ u(); });
-    unsubs = [];
-    accounts = []; transactions = [];
-    showLogin();
+if(auth){
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      $('user-email').textContent = user.email;
+      showApp();
+      loadData();
+      fetchRate();
+    } else {
+      unsubs.forEach(function(u){ u(); });
+      unsubs = [];
+      accounts = []; transactions = [];
+      showLogin();
+    }
+  });
+}
+
+// ---------- Menu mobile ----------
+$('btn-menu').addEventListener('click', function(){
+  $('header-actions').classList.toggle('open');
+});
+document.addEventListener('click', function(e){
+  var a = $('header-actions');
+  if(a.classList.contains('open') && !a.contains(e.target) && e.target.id !== 'btn-menu'){
+    a.classList.remove('open');
   }
 });
 
@@ -856,4 +899,39 @@ function renderChart(){
   out += '<circle cx="'+x(minIdx)+'" cy="'+y(chartPoints[minIdx].balance)+'" r="7" fill="#ff5d5d" stroke="#fff" stroke-width="2"/>';
   out += '<text x="'+x(minIdx)+'" y="'+(y(chartPoints[minIdx].balance)-14)+'" text-anchor="middle" fill="#ff5d5d" font-size="13" font-weight="bold">Menor saldo</text>';
 
-  chartPoints.forEach(function(p
+  chartPoints.forEach(function(p,i){
+    var label = p.label + '/' + String(p.year).slice(2);
+    out += '<text x="'+x(i)+'" y="'+(CHART_H-16)+'" text-anchor="middle" fill="#8b96a8" font-size="12">'+label+'</text>';
+  });
+
+  svg.innerHTML = out;
+}
+
+var chartWrap = $('chart-wrap');
+var tooltip = $('chart-tooltip');
+function showTooltipAt(i, clientX, clientY){
+  if(!chartPoints[i]) return;
+  var rect = chartWrap.getBoundingClientRect();
+  var p = chartPoints[i];
+  tooltip.innerHTML = '<b>'+p.label+'/'+p.year+'</b><br>Saldo: '+fmtMoney(p.balance,'BRL');
+  tooltip.style.display = 'block';
+  var left = clientX - rect.left + 14;
+  var top = clientY - rect.top - 10;
+  if(left + 160 > rect.width) left = clientX - rect.left - 170;
+  if(top < 0) top = 0;
+  tooltip.style.left = left+'px';
+  tooltip.style.top = top+'px';
+}
+function hideTooltip(){ tooltip.style.display = 'none'; }
+function nearestIndex(clientX){
+  var rect = chartWrap.getBoundingClientRect();
+  var px = (clientX - rect.left) / rect.width * CHART_W;
+  var best = 0, bd = 1e9;
+  chartPoints.forEach(function(p,i){
+    var xi = CHART_PADL + i*(CHART_W-CHART_PADL-CHART_PADR)/(chartPoints.length-1);
+    var d = Math.abs(xi - px);
+    if(d < bd){ bd = d; best = i; }
+  });
+  return best;
+}
+chartWrap.addEventListener('mousemove', function(e){ showTool
